@@ -47,3 +47,8 @@ done
 
 # Add demo program
 ./programs/provision.sh lms
+
+# Move lms.env.json and cms.env.json to separate folder, mounted as volume on run
+for app in "${apps[@]}"; do
+    docker-compose exec $app bash -c 'mkdir -p /edx/src; test -f /edx/src/lms.env.json.orig || (mv /edx/app/edxapp/lms.env.json /edx/src/lms.env.json.orig; ln -s /edx/src/lms.env.json /edx/app/edxapp/lms.env.json); test -f /edx/src/cms.env.json.orig || (mv /edx/app/edxapp/cms.env.json /edx/src/cms.env.json.orig; ln -s /edx/src/cms.env.json /edx/app/edxapp/cms.env.json)'
+done

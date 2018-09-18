@@ -1,3 +1,77 @@
+RaccoonGang Open edX Devstack
+====
+
+Installation instructions
+-------------------------
+
+Create a directory which will contain `devstack working environment`.
+`devstack` directory will contain clone of this repository, all other directories will
+be created by provision script.
+
+
+working directory structure after provision::
+
+  .
+  └── ironwood
+    ├── course-discovery
+    ├── credentials
+    ├── cs_comments_service
+    ├── devstack <---------- cloned manually (see below)
+    ├── ecommerce
+    ├── edx-analytics-pipeline
+    ├── edx-e2e-tests
+    ├── edx-notes-api
+    ├── edx-platform
+    ├── edx-theme
+    ├── gradebook
+    ├── src
+    └── xqueue
+
+clone this repository and run provision script:
+
+.. code:: sh
+
+   cd ironwood
+   git clone git@github.com:raccoongang/devstack.git -b ironwood-rg devstack
+   cd devstack
+
+   export DEVSTACK_WORKSPACE=`pwd`/../
+   export OPENEDX_RELEASE=ironwood.master
+   make provision
+   make dev.up
+
+Usage
+-----
+
+.. code:: sh
+
+   export DEVSTACK_WORKSPACE=`pwd`/../
+   make dev.up
+
+   git -C ../edx-platform checkout custom-branch
+   git -C ../theme checkout custom-branch
+   make dev.provision.run
+   make lms-static
+   make studio-static
+   make lms-logs
+   make dev.stop
+
+Note for using devstack on Linux
+--------------------------------
+
+This command must be ussued before using devstack:
+
+.. code:: sh
+
+  sudo -s bash -c 'echo 30000 > /proc/sys/fs/inotify/max_user_watches'
+
+To add this change to the system permanently (will be applied after next reboot):
+
+.. code:: sh
+
+  echo 'user.max_inotify_watches=30000' >> /etc/sysctl.conf
+
+
 Open edX Devstack |Build Status|
 ================================
 

@@ -12,10 +12,26 @@ set -e
 set -o pipefail
 set -x
 
+if [ -z "$DEVSTACK_WORKSPACE" ]; then
+    echo "need to set workspace dir"
+    exit 1
+elif [ ! -d "$DEVSTACK_WORKSPACE" ]; then
+    echo "Workspace directory $DEVSTACK_WORKSPACE doesn't exist"
+    exit 1
+fi
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
+
+# Create default configuration files to mount them as volumes
+for conf in lms.env.json.gz cms.env.json.gz ; do
+  test -f ${DEVSTACK_WORKSPACE}/src/${conf} || \
+  mkdir -p ${DEVSTACK_WORKSPACE}/src && \
+  cp scripts/defaults/${conf} ${DEVSTACK_WORKSPACE}/src/ && \
+  gzip -f -d ${DEVSTACK_WORKSPACE}/src/${conf}
+done
 
 # Bring the databases online.
 docker-compose up -d mysql mongo
