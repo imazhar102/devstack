@@ -7,7 +7,6 @@
 # 3. Service users and OAuth clients setup in LMS,
 # 4. Static assets compiled/collected.
 
-
 set -e
 set -o pipefail
 set -x
@@ -16,6 +15,27 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
+
+DEVSTACK_DIR=`dirname $0`
+for conf in ${DEVSTACK_DIR}/local*.sh ; do
+    source ${conf}
+done
+
+if [ -z "$DEVSTACK_WORKSPACE" ]; then
+    echo "need to set workspace dir"
+    exit 1
+elif [ ! -d "$DEVSTACK_WORKSPACE" ]; then
+    echo "Workspace directory $DEVSTACK_WORKSPACE doesn't exist"
+    exit 1
+fi
+
+# Create default configuration files to mount them as volumes
+for conf in lms.env.json.gz cms.env.json.gz ; do
+  mkdir -p ${DEVSTACK_WORKSPACE}/src
+  test -f ${DEVSTACK_WORKSPACE}/src/${conf} || \
+  cp scripts/defaults/${conf} ${DEVSTACK_WORKSPACE}/src/ && \
+  gzip -f -d ${DEVSTACK_WORKSPACE}/src/${conf}
+done
 
 # Bring the databases online.
 docker-compose up -d mysql mongo

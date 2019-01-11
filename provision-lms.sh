@@ -47,3 +47,9 @@ done
 
 # Add demo program
 ./programs/provision.sh lms
+
+# Move original lms.env.json and cms.env.json to backup files on /edx/src docker volume
+# Create lms.env.json and cms.env.json as symlinks to files on /edx/src docker volume
+for app in "${apps[@]}"; do
+    docker-compose exec $app bash -c 'mkdir -p /edx/src; test -L /edx/app/edxapp/lms.env.json || (mv /edx/app/edxapp/lms.env.json /edx/src/lms.env.json.orig; ln -s /edx/src/lms.env.json /edx/app/edxapp/lms.env.json); test -L /edx/app/edxapp/cms.env.json || (mv /edx/app/edxapp/cms.env.json /edx/src/cms.env.json.orig; ln -s /edx/src/cms.env.json /edx/app/edxapp/cms.env.json)'
+done
