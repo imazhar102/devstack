@@ -84,13 +84,13 @@ _clone ()
         if [ -d "$name" -a -n "$(ls -A "$name" 2>/dev/null)" ]; then
             printf "The [%s] repo is already checked out. Continuing.\n" $name
         else
-            if [ "${SHALLOW_CLONE}" == "1" ]; then
-                git clone --depth=1 $repo
-            else
-                git clone $repo
-            fi
             if [ -n "${OPENEDX_RELEASE}" ]; then
-                git checkout open-release/${OPENEDX_RELEASE}
+                BRANCH="-b open-release/${OPENEDX_RELEASE}"
+            fi
+            if [ "${SHALLOW_CLONE}" == "1" ]; then
+                git clone --depth=1 $repo ${BRANCH}
+            else
+                git clone $repo ${BRANCH}
             fi
         fi
     done
