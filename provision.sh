@@ -27,7 +27,8 @@ NC='\033[0m' # No Color
 
 # Create default configuration files to mount them as volumes
 for conf in lms.env.json.gz cms.env.json.gz ; do
-  cp scripts/defaults/${conf} ${DEVSTACK_WORKSPACE}/src/
+  test -f ${DEVSTACK_WORKSPACE}/src/${conf} || \
+  cp scripts/defaults/${conf} ${DEVSTACK_WORKSPACE}/src/ && \
   gzip -f -d ${DEVSTACK_WORKSPACE}/src/${conf}
 done
 

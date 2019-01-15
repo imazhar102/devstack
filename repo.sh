@@ -8,8 +8,12 @@ set -o pipefail
 # Repos are cloned to/removed from the directory above the one housing this file.
 
 if [ -z "$DEVSTACK_WORKSPACE" ]; then
-    echo "need to set workspace dir"
-    exit 1
+    if ls ../src/lms.env.json > /dev/null 2>&1 ; then
+        export DEVSTACK_WORKSPACE=`pwd`/..
+    else
+        echo "need to set workspace dir"
+        exit 1
+    fi
 elif [ -d "$DEVSTACK_WORKSPACE" ]; then
     cd $DEVSTACK_WORKSPACE
 else
@@ -17,48 +21,53 @@ else
     exit 1
 fi
 
+if [ -n "${OPENEDX_RELEASE}" ]; then
+    BRANCH="open-release/${OPENEDX_RELEASE}"
+else
+    BRANCH="master"
+fi
+
 repos=(
-    "https://github.com/edx/course-discovery.git"
-    "https://github.com/edx/credentials.git"
-    "https://github.com/edx/cs_comments_service.git"
-    "https://github.com/edx/ecommerce.git"
-    "https://github.com/edx/edx-e2e-tests.git"
-    "https://github.com/edx/edx-notes-api.git"
-    "https://github.com/edx/edx-platform.git"
-    "https://github.com/edx/xqueue.git"
-    "https://github.com/edx/edx-analytics-pipeline.git"
+    "https://github.com/edx/course-discovery.git,$BRANCH"
+    "https://github.com/edx/credentials.git,$BRANCH"
+    "https://github.com/edx/cs_comments_service.git,$BRANCH"
+    "https://github.com/edx/ecommerce.git,$BRANCH"
+    "https://github.com/edx/edx-e2e-tests.git,$BRANCH"
+    "https://github.com/edx/edx-notes-api.git,$BRANCH"
+    "https://github.com/raccoongang/edx-platform.git,hawthorn-rg"
+    "https://github.com/raccoongang/edx-theme.git,base-hawthorn-stage"
+    "https://github.com/edx/xqueue.git,$BRANCH"
+    "https://github.com/edx/edx-analytics-pipeline.git,$BRANCH"
 )
 
 private_repos=(
     # Needed to run whitelabel tests.
-    "https://github.com/edx/edx-themes.git"
+    "https://github.com/edx/edx-themes.git,$BRANCH"
 )
 
-name_pattern=".*edx/(.*).git"
+repobranch_pattern="(.*),(.*)"
+name_pattern=".*/(.*)/(.*).git"
 
 _checkout ()
 {
     repos_to_checkout=("$@")
 
-    if [ -z "$OPENEDX_RELEASE" ]; then
-        branch="master"
-    else
-        branch="open-release/${OPENEDX_RELEASE}"
-    fi
-    for repo in "${repos_to_checkout[@]}"
+    for repobranch in "${repos_to_checkout[@]}"
     do
         # Use Bash's regex match operator to capture the name of the repo.
         # Results of the match are saved to an array called $BASH_REMATCH.
+        [[ $repobranch =~ $repobranch_pattern ]]
+        repo="${BASH_REMATCH[1]}"
+        branch="${BASH_REMATCH[2]}"
         [[ $repo =~ $name_pattern ]]
-        name="${BASH_REMATCH[1]}"
+        origin="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
 
         # If a directory exists and it is nonempty, assume the repo has been cloned.
-        if [ -d "$name" -a -n "$(ls -A "$name" 2>/dev/null)" ]; then
-            cd $name
+        if [ -d "${DEVSTACK_WORKSPACE}/${name}" -a -n "$(ls -A "${DEVSTACK_WORKSPACE}/${name}" 2>/dev/null)" ]; then
             echo "Checking out branch $branch of $name"
-            git pull
-            git checkout "$branch"
-            cd ..
+            git -C ${DEVSTACK_WORKSPACE}/${name} pull
+            git -C ${DEVSTACK_WORKSPACE}/${name} checkout "$branch"
         fi
     done
 }
@@ -73,24 +82,25 @@ _clone ()
     # for repo in ${repos[*]}
     repos_to_clone=("$@")
 
-    for repo in "${repos_to_clone[@]}"
+    for repobranch in "${repos_to_clone[@]}"
     do
         # Use Bash's regex match operator to capture the name of the repo.
         # Results of the match are saved to an array called $BASH_REMATCH.
+        [[ $repobranch =~ $repobranch_pattern ]]
+        repo="${BASH_REMATCH[1]}"
+        branch="${BASH_REMATCH[2]}"
         [[ $repo =~ $name_pattern ]]
-        name="${BASH_REMATCH[1]}"
+        origin="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
 
         # If a directory exists and it is nonempty, assume the repo has been checked out.
-        if [ -d "$name" -a -n "$(ls -A "$name" 2>/dev/null)" ]; then
+        if [ -d "${DEVSTACK_WORKSPACE}/${name}" -a -n "$(ls -A "${DEVSTACK_WORKSPACE}/${name}" 2>/dev/null)" ]; then
             printf "The [%s] repo is already checked out. Continuing.\n" $name
         else
-            if [ -n "${OPENEDX_RELEASE}" ]; then
-                BRANCH="-b open-release/${OPENEDX_RELEASE}"
-            fi
             if [ "${SHALLOW_CLONE}" == "1" ]; then
-                git clone --depth=1 $repo ${BRANCH}
+                git clone --depth=1 $repo -b ${branch} ${DEVSTACK_WORKSPACE}/${name}
             else
-                git clone $repo ${BRANCH}
+                git clone $repo -b ${branch} ${DEVSTACK_WORKSPACE}/${name}
             fi
         fi
     done
@@ -113,7 +123,8 @@ reset ()
     for repo in ${repos[*]}
     do
         [[ $repo =~ $name_pattern ]]
-        name="${BASH_REMATCH[1]}"
+        origin="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
 
         if [ -d "$name" ]; then
             cd $name;git reset --hard HEAD;git checkout master;git reset --hard origin/master;git pull;cd "$currDir"
@@ -130,11 +141,12 @@ status ()
     for repo in ${repos[*]}
     do
         [[ $repo =~ $name_pattern ]]
-        name="${BASH_REMATCH[1]}"
+        origin="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
 
         if [ -d "$name" ]; then
             printf "\nGit status for [%s]:\n" $name
-            cd $name;git status;cd "$currDir"
+            cd $name;git remote -v;git status;cd "$currDir"
         else
             printf "The [%s] repo is not cloned. Continuing.\n" $name
         fi
