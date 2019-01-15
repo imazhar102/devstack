@@ -13,6 +13,8 @@ OS := $(shell uname)
 
 COMPOSE_PROJECT_NAME=devstack
 
+include local*.sh
+
 export DEVSTACK_WORKSPACE
 export COMPOSE_PROJECT_NAME
 
