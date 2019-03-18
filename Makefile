@@ -279,4 +279,4 @@ stats: ## Get per-container CPU and memory utilization data
 	docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"
 
 studio-reindex-courses: ## Rebuild static assets for the Studio container
-	docker exec -t edx.devstack.studio bash -c 'yes | /edx/app/edxapp/venvs/edxapp/bin/python /edx/app/edxapp/edx-platform/manage.py cms reindex_course --all --settings devstack_docker'
+	docker exec -t edx.devstack.studio bash -c 'echo y | /edx/app/edxapp/venvs/edxapp/bin/python /edx/app/edxapp/edx-platform/manage.py cms reindex_course --all --settings devstack_docker; echo y | /edx/app/edxapp/venvs/edxapp/bin/python /edx/app/edxapp/edx-platform/manage.py cms reindex_library --all --settings devstack_docker'
