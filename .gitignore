@@ -99,3 +99,7 @@ ENV/
 
 # Personal makefile extensions
 local.mk
+
+# The configuration varibles override files
+local*.sh
+local*.sh.sample

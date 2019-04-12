@@ -2,6 +2,11 @@ set -e
 set -o pipefail
 set -x
 
+DEVSTACK_DIR=`dirname $0`
+for conf in ${DEVSTACK_DIR}/local*.sh ; do
+    source ${conf}
+done
+
 if [ -z "$DEVSTACK_WORKSPACE" ]; then
     DEVSTACK_WORKSPACE=..
 elif [ ! -d "$DEVSTACK_WORKSPACE" ]; then

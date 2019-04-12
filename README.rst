@@ -1,3 +1,101 @@
+RaccoonGang's Open edX Devstack
+====
+
+Official upstream's instructions can be found later in this file - `Open edX Devstack Build Status`_
+
+Installation instructions
+-------------------------
+
+* create directory for ``devstack working environment``. The directory will contain
+  clone of this repository and repositories created by provision script (edx-plaform,
+  cs_comments_service, credentials, etc, etc). For example:
+
+.. code:: sh
+
+   mkdir -p ~/work/edx/devstack/hawthorn
+
+* clone this repository:
+
+.. code:: sh
+
+   cd ~/work/edx/devstack/hawthorn
+   git clone git@github.com:raccoongang/devstack.git -b hawthorn-rg devstack
+   cd devstack
+
+* optional step: customize configuration variables in ``local-rg.sh`` file:
+
+  * COMPOSE_PROJECT_NAME - allow creation of docker containes with unique names for different environments
+  * DEVSTACK_WORKSPACE - directory for ``devstack working environment``
+  * repos - list of repositories and corresponding branches
+
+* run provision script:
+
+.. code:: sh
+
+   make provision
+   make dev.up
+
+devstack working environment directory structure after provision::
+
+   .
+   └── hawthorn
+     ├── course-discovery
+     ├── credentials
+     ├── cs_comments_service
+     ├── devstack <---------- cloned manually at previous step
+     ├── ecommerce
+     ├── edx-analytics-pipeline
+     ├── edx-e2e-tests
+     ├── edx-notes-api
+     ├── edx-platform
+     ├── edx-theme
+     ├── gradebook
+     ├── src
+     └── xqueue
+
+* check availability of devstack services:
+
+  * `LMS <http://127.0.0.1:18000/>`_
+  * `CMS <http://127.0.0.1:18010/>`_
+  * `Ecommerce <http://127.0.0.1:18130/admin>`_
+  * `Discovery <http://127.0.0.1:18381/admin>`_
+  * `Credentials <http://127.0.0.1:18150/admin>`_
+  * `edX notes <http://127.0.0.1:18120/>`_
+  * `devpi <http://127.0.0.1:3141/>`_
+
+Usage
+-----
+
+Configuration variables can be set inside ``local-rg.sh`` file to skip exporting them
+every time using devstack.
+
+.. code:: sh
+
+   make dev.up
+
+   git -C ../edx-platform checkout custom-branch
+   git -C ../theme checkout custom-branch
+   make dev.provision.run
+   make lms-static
+   make studio-static
+   make lms-logs
+   make dev.stop
+
+Note for Linux and Windows WSL users
+----------------------------------
+
+This command must be ussued before using devstack:
+
+.. code:: sh
+
+  sudo -s bash -c 'echo 30000 > /proc/sys/fs/inotify/max_user_watches'
+
+To add this changes to the system permanently (will be applied after next reboot):
+
+.. code:: sh
+
+  echo 'user.max_inotify_watches=30000' >> /etc/sysctl.conf
+
 Open edX Devstack |Build Status|
 ================================
 

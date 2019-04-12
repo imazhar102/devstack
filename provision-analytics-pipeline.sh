@@ -9,6 +9,11 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
+DEVSTACK_DIR=`dirname $0`
+for conf in ${DEVSTACK_DIR}/local*.sh ; do
+    source ${conf}
+done
+
 if [ -z "$DEVSTACK_WORKSPACE" ]; then
     DEVSTACK_WORKSPACE=..
 elif [ ! -d "$DEVSTACK_WORKSPACE" ]; then
