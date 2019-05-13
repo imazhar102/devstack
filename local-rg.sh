@@ -8,6 +8,8 @@
 
 # The part of docker container names can be overriden for specific project
 #
+# please do not modify this variable! the work is in progress...
+#
 # export COMPOSE_PROJECT_NAME=devstack
 
 # The directory where clonned repositories will be kept

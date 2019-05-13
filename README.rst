@@ -1,59 +1,64 @@
 RaccoonGang's Open edX Devstack
-====
+===============================
 
 Official upstream's instructions can be found later in this file - `Open edX Devstack Build Status`_
 
 Installation instructions
 -------------------------
 
-* create directory for ``devstack working environment``. The directory will contain
-  clone of this repository and repositories created by provision script (edx-plaform,
-  cs_comments_service, credentials, etc, etc). For example:
+1. create directory for ``devstack working environment``. The directory will contain
+   clone of this repository and repositories created by provision script (edx-plaform,
+   cs_comments_service, credentials, etc, etc). For example:
 
-.. code:: sh
+  .. code:: sh
 
-   mkdir -p ~/work/edx/devstack/hawthorn
+    mkdir -p ~/work/edx/devstack/hawthorn
 
-* clone this repository:
+2. clone this repository:
 
-.. code:: sh
+  .. code:: sh
 
-   cd ~/work/edx/devstack/hawthorn
-   git clone git@github.com:raccoongang/devstack.git -b hawthorn-rg devstack
-   cd devstack
+    cd ~/work/edx/devstack/hawthorn
+    git clone git@github.com:raccoongang/devstack.git -b hawthorn-rg devstack
+    cd devstack
 
-* optional step: customize configuration variables in ``local-rg.sh`` file:
+3. optional step: customize configuration variables in ``local-rg.sh`` file:
 
-  * COMPOSE_PROJECT_NAME - allow creation of docker containes with unique names for different environments
   * DEVSTACK_WORKSPACE - directory for ``devstack working environment``
   * repos - list of repositories and corresponding branches
 
-* run provision script:
+4. MacOS users: make sure Docker app was configured to allocate more than 3.5Gb of memory
+   for running containers. Please choose limit basing on the total amount of your hardware
+   memory (4Gb is enough for using single edX devstack installation)
 
-.. code:: sh
+    .. image:: https://2xbbhjxc6wk3v21p62t8n4d4-wpengine.netdna-ssl.com/wp-content/uploads/2018/12/docker-mac-configure.jpg
 
-   make provision
-   make dev.up
+5. run provision script. Ones with MacOS can use dev.sync.provision (please refer to
+   `Performance`_ notes of this readme)
 
-devstack working environment directory structure after provision::
+  .. code:: sh
 
-   .
-   └── hawthorn
-     ├── course-discovery
-     ├── credentials
-     ├── cs_comments_service
-     ├── devstack <---------- cloned manually at previous step
-     ├── ecommerce
-     ├── edx-analytics-pipeline
-     ├── edx-e2e-tests
-     ├── edx-notes-api
-     ├── edx-platform
-     ├── edx-theme
-     ├── gradebook
-     ├── src
-     └── xqueue
+    make dev.provision # make dev.sync.provision
+    make dev.up
 
-* check availability of devstack services:
+  devstack working environment directory structure after provision::
+
+    .
+    └── hawthorn
+      ├── course-discovery
+      ├── credentials
+      ├── cs_comments_service
+      ├── devstack <---------- cloned manually at clone step
+      ├── ecommerce
+      ├── edx-analytics-pipeline
+      ├── edx-e2e-tests
+      ├── edx-notes-api
+      ├── edx-platform
+      ├── edx-theme
+      ├── src
+      └── xqueue
+
+6. check availability of devstack services (default user `staff@example.com` for frontend access, `staff` for */admin* access and password is `edx`):
 
   * `LMS <http://127.0.0.1:18000/>`_
   * `CMS <http://127.0.0.1:18010/>`_
@@ -66,7 +71,7 @@ devstack working environment directory structure after provision::
 Usage
 -----
 
-Configuration variables can be set inside ``local-rg.sh`` file to skip exporting them
+Configuration variables can be set in `local-rg.sh <local-rg.sh>`_ file to skip exporting them
 every time using devstack.
 
 .. code:: sh
@@ -79,10 +84,15 @@ every time using devstack.
    make lms-static
    make studio-static
    make lms-logs
-   make dev.stop
+
+   make stop
+
+To use docker containers directly via `docker` or `docker-compose` commands it is necessary to
+set variables from `local-rg.sh <local-rg.sh>`_ in currect console shell session. Please execute `. ./local-rg.sh`
+before using docker or docker-compose builds.
 
 Note for Linux and Windows WSL users
-----------------------------------
+------------------------------------
 
 This command must be ussued before using devstack:
 
@@ -95,6 +105,12 @@ To add this changes to the system permanently (will be applied after next reboot
 .. code:: sh
 
   echo 'user.max_inotify_watches=30000' >> /etc/sysctl.conf
+
+
+This is the end of RaccoonGang's comments
+-----------------------------------------
+
+Official README was kept below this point.
 
 Open edX Devstack |Build Status|
 ================================
