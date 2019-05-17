@@ -12,7 +12,9 @@ DEVSTACK_WORKSPACE ?= $(shell pwd)/..
 OS := $(shell uname)
 
 COMPOSE_PROJECT_NAME=devstack
+OPENEDX_RELEASE=hawthorn.master
 
+export OPENEDX_RELEASE
 export DEVSTACK_WORKSPACE
 export COMPOSE_PROJECT_NAME
 
@@ -43,7 +45,7 @@ dev.clone: ## Clone service repos to the parent directory
 dev.provision.run: ## Provision all services with local mounted directories
 	DOCKER_COMPOSE_FILES="-f docker-compose.yml -f docker-compose-host.yml" ./provision.sh
 
-dev.provision: | check-memory dev.clone dev.provision.run stop ## Provision dev environment with all services stopped
+dev.provision: | check-memory dev.clone dev.provision.run ## Provision dev environment with all services stopped
 
 dev.provision.xqueue: | check-memory dev.provision.xqueue.run stop stop.xqueue
 
@@ -78,6 +80,9 @@ dev.sync.provision: | dev.sync.daemon.start dev.provision ## Provision with dock
 
 dev.sync.requirements: ## Install requirements
 	gem install docker-sync
+
+dev.sync.start: dev.sync.daemon.start ## Bring up all services with docker-sync enabled
+	docker-compose -f docker-compose.yml -f docker-compose-sync.yml start -d
 
 dev.sync.up: dev.sync.daemon.start ## Bring up all services with docker-sync enabled
 	docker-compose -f docker-compose.yml -f docker-compose-sync.yml up -d
