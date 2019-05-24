@@ -54,6 +54,7 @@ echo -e "${GREEN}Creating databases and users...${NC}"
 docker exec -i edx.devstack.mysql mysql -uroot mysql < provision.sql
 docker exec -i edx.devstack.mongo mongo < mongo-provision.js
 
+./provision-gamma.sh
 ./provision-lms.sh
 
 # Nothing special needed for studio

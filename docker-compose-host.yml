@@ -39,6 +39,12 @@ services:
     volumes:
       - ${DEVSTACK_WORKSPACE}/gradebook:/edx/app/gradebook:cached
       - gradebook_node_modules:/edx/app/gradebook/node_modules
+  gamma:
+    volumes:
+      - ${DEVSTACK_WORKSPACE}/gamma:/app
+  celery:
+    volumes:
+      - ${DEVSTACK_WORKSPACE}/gamma:/home/user/app
       
 volumes:
   credentials_node_modules:

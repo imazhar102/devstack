@@ -28,6 +28,7 @@ else
 fi
 
 repos=(
+    "git@gitlab.raccoongang.com:cmltaWt0/gamma.git,marenich/frontend"
     "https://github.com/edx/course-discovery.git,$OPENEDX_GIT_BRANCH"
     "https://github.com/edx/credentials.git,$OPENEDX_GIT_BRANCH"
     "https://github.com/edx/cs_comments_service.git,$OPENEDX_GIT_BRANCH"
@@ -46,7 +47,7 @@ private_repos=(
 )
 
 repobranch_pattern="(.*),(.*)"
-name_pattern=".*/(.*)/(.*).git"
+name_pattern=".*/(.*).git"
 
 _checkout ()
 {
@@ -60,12 +61,11 @@ _checkout ()
         repo="${BASH_REMATCH[1]}"
         branch="${BASH_REMATCH[2]}"
         [[ $repo =~ $name_pattern ]]
-        origin="${BASH_REMATCH[1]}"
-        name="${BASH_REMATCH[2]}"
+        name="${BASH_REMATCH[1]}"
 
         # If a directory exists and it is nonempty, assume the repo has been cloned.
         if [ -d "${DEVSTACK_WORKSPACE}/${name}" -a -n "$(ls -A "${DEVSTACK_WORKSPACE}/${name}" 2>/dev/null)" ]; then
-            echo "Checking out branch $branch of $name"
+            echo "Checking out branch $branch of $name from $repo"
             _checkout_and_update_branch
         fi
     done
@@ -89,15 +89,16 @@ _clone ()
         repo="${BASH_REMATCH[1]}"
         branch="${BASH_REMATCH[2]}"
         [[ $repo =~ $name_pattern ]]
-        origin="${BASH_REMATCH[1]}"
-        name="${BASH_REMATCH[2]}"
+        name="${BASH_REMATCH[1]}"
 
         # If a directory exists and it is nonempty, assume the repo has been checked out
         # and only make sure it's on the required branch
         if [ -d "${DEVSTACK_WORKSPACE}/${name}" -a -n "$(ls -A "${DEVSTACK_WORKSPACE}/${name}" 2>/dev/null)" ]; then
             printf "The [%s] repo is already checked out. Checking for updates.\n" $name
+            echo "Checking out branch $branch of $name from $repo"
             _checkout_and_update_branch
         else
+            echo "Cloning branch $branch of $name from $repo"
             if [ "${SHALLOW_CLONE}" == "1" ]; then
                 git clone --single-branch -b ${branch} -c core.symlinks=true --depth=1 ${repo} ${DEVSTACK_WORKSPACE}/${name}
             else
@@ -137,8 +138,7 @@ reset ()
     for repo in ${repos[*]}
     do
         [[ $repo =~ $name_pattern ]]
-        origin="${BASH_REMATCH[1]}"
-        name="${BASH_REMATCH[2]}"
+        name="${BASH_REMATCH[1]}"
 
         if [ -d "$name" ]; then
             cd $name;git reset --hard HEAD;git checkout master;git reset --hard origin/master;git pull;cd "$currDir"
@@ -155,8 +155,7 @@ status ()
     for repo in ${repos[*]}
     do
         [[ $repo =~ $name_pattern ]]
-        origin="${BASH_REMATCH[1]}"
-        name="${BASH_REMATCH[2]}"
+        name="${BASH_REMATCH[1]}"
 
         if [ -d "$name" ]; then
             printf "\nGit status for [%s]:\n" $name
